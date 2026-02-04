@@ -1,0 +1,8 @@
+{
+  "schema_version": "0.5.15",
+  "verifier_id": "basic_l1",
+  "verdict": "FAIL",
+  "outcome": "FAIL",
+  "reason_codes": ["schema_violation"],
+  "violated_constraints": ["FORMAT:JSON_ONLY"]
+}

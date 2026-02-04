@@ -1,0 +1,13 @@
+{
+  "schema_version": "0.5.15",
+  "trace_id": "trace_tree_search",
+  "bucket_key": "I3|math|clarity_low",
+  "x_ref": "prove lemma",
+  "run.mode": "tree",
+  "selected_rules": ["tree_search_rule"],
+  "pass_value": 0,
+  "verifier_id": "basic_l1",
+  "verifier_verdict": "PARTIAL",
+  "verifier_outcome": "UNKNOWN",
+  "verifier_reason_codes": ["insufficient_evidence"]
+}
