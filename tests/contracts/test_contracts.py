@@ -71,7 +71,7 @@ def validate_eventlog(payload: dict) -> None:
     assert payload["trace_id"].strip()
     assert payload["bucket_key"].strip()
     assert payload["x_ref"].strip()
-    assert payload["run.mode"] in {"main", "tree", "probe", "full"}
+    assert payload["run.mode"] in {"main", "probe", "tree", "full"}
     assert payload["pass_value"] in {0, 1}
 
     if "intent_key" in payload and payload["intent_key"] is not None:
@@ -81,7 +81,10 @@ def validate_eventlog(payload: dict) -> None:
 
     assert_type(payload["selected_rules"], list)
     for rule in payload["selected_rules"]:
-        assert rule.strip()
+        assert_type(rule, dict)
+        assert rule["rule_id"].strip()
+        assert rule["version"].strip()
+        assert rule["type"].strip()
 
     assert payload["verifier_id"].strip()
     assert payload["verifier_verdict"] in {"PASS", "FAIL", "PARTIAL"}

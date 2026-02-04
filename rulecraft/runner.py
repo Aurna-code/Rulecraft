@@ -11,6 +11,7 @@ from rulecraft.adapters import LLMAdapter, VerifierAdapter
 from rulecraft.memory import MemoryStore
 from rulecraft.policy import BudgetRouter
 from rulecraft.schemas import EventLog, VerifierResult, pass_definition
+from rulecraft.selector import CandidateSelector
 from rulecraft.serializer import serialize_eventlog
 
 
@@ -29,13 +30,17 @@ class RulecraftRunner:
         verifier: VerifierAdapter,
         memory_store: MemoryStore | None = None,
         budget_router: BudgetRouter | None = None,
+        selector: CandidateSelector | None = None,
         eventlog_path: Path | None = None,
+        max_attempts: int = 3,
     ) -> None:
         self.llm_adapter = llm_adapter
         self.verifier = verifier
         self.memory_store = memory_store or MemoryStore()
         self.budget_router = budget_router or BudgetRouter()
+        self.selector = selector or CandidateSelector()
         self.eventlog_path = eventlog_path or Path("data") / "eventlog.jsonl"
+        self.max_attempts = max_attempts
 
     def _build_keys(self, context: dict) -> tuple[str | None, str | None]:
         intent_key = context.get("intent_key")
@@ -80,45 +85,35 @@ class RulecraftRunner:
             top_k=context.get("rule_top_k", 3),
         )
         memory_hints = [item.summary for item in memory_response.items]
+        selected_rules = self.selector.select(context, memory_response)
 
-        messages = self._build_messages(prompt, memory_hints)
-        output, meta = self.llm_adapter.generate(
-            messages,
-            temperature=context.get("temperature", 0.2),
-            max_tokens=context.get("max_tokens"),
-        )
-
-        verifier_dict = self.verifier.verify(
-            trace_id=trace_id,
-            x_ref=prompt,
-            candidate=output,
-            context=context,
-            constraints=constraints,
-            meta=meta,
-        )
-        verifier = VerifierResult(**verifier_dict)
-
-        if self.budget_router.should_scale(
-            verifier,
-            impact_level=context.get("impact_level"),
-            bucket_key=bucket_key,
-        ):
-            messages.append({"role": "assistant", "content": str(output)})
-            messages.append({"role": "user", "content": "Double-check and refine."})
+        run_mode = context.get("run_mode", "main")
+        attempt = 0
+        output: str | dict
+        verifier = None
+        while attempt < self.max_attempts:
+            messages = self._build_messages(prompt, memory_hints)
             output, meta = self.llm_adapter.generate(
                 messages,
                 temperature=context.get("temperature", 0.2),
                 max_tokens=context.get("max_tokens"),
             )
+
             verifier_dict = self.verifier.verify(
                 trace_id=trace_id,
                 x_ref=prompt,
                 candidate=output,
-                context=context,
+                context={**context, "run_mode": run_mode},
                 constraints=constraints,
                 meta=meta,
             )
             verifier = VerifierResult(**verifier_dict)
+
+            next_mode = self.budget_router.decide_next_mode(verifier, run_mode, attempt)
+            if not next_mode:
+                break
+            run_mode = next_mode
+            attempt += 1
 
         event_log = EventLog(
             schema_version=verifier.schema_version,
@@ -127,8 +122,8 @@ class RulecraftRunner:
             intent_key=intent_key,
             state_key=state_key,
             x_ref=prompt,
-            run_mode=context.get("run_mode", "main"),
-            selected_rules=context.get("selected_rules", []),
+            run_mode=run_mode,
+            selected_rules=selected_rules,
             pass_value=1 if pass_definition(verifier) else 0,
             verifier_id=verifier.verifier_id,
             verifier_verdict=verifier.verdict,

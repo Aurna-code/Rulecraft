@@ -87,7 +87,7 @@ def test_t07_should_scale_defaults() -> None:
         verdict="FAIL",
         outcome="FAIL",
     )
-    assert router.should_scale(fail_verifier, impact_level="I1") is True
+    assert router.decide_next_mode(fail_verifier, "main", 0) == "probe"
 
     unknown_i3 = VerifierResult(
         schema_version="0.5.15",
@@ -96,13 +96,46 @@ def test_t07_should_scale_defaults() -> None:
         outcome="UNKNOWN",
         reason_codes=["insufficient_evidence"],
     )
-    assert router.should_scale(unknown_i3, impact_level="I3") is True
+    assert router.decide_next_mode(unknown_i3, "main", 0) == "probe"
 
-    unknown_reason = VerifierResult(
-        schema_version="0.5.15",
-        verifier_id="test",
-        verdict="PASS",
-        outcome="UNKNOWN",
-        reason_codes=["insufficient_evidence"],
+
+def test_t08_escalates_on_insufficient_evidence() -> None:
+    path = Path("data") / "eventlog.jsonl"
+    if path.exists():
+        path.unlink()
+
+    runner = RulecraftRunner(
+        llm_adapter=EchoLLMAdapter(),
+        verifier=BasicVerifier(),
+        eventlog_path=path,
+        max_attempts=2,
     )
-    assert router.should_scale(unknown_reason, impact_level="I1") is True
+    runner.run(
+        prompt="check",
+        context={"bucket_key": "I2|general|clarity_med"},
+        constraints={"requires_external_check": True},
+    )
+
+    payload = json.loads(path.read_text(encoding="utf-8").strip().splitlines()[-1])
+    assert payload["run.mode"] in {"probe", "tree", "full"}
+
+
+def test_t09_no_escalation_on_schema_violation() -> None:
+    path = Path("data") / "eventlog.jsonl"
+    if path.exists():
+        path.unlink()
+
+    runner = RulecraftRunner(
+        llm_adapter=EchoLLMAdapter(),
+        verifier=BasicVerifier(),
+        eventlog_path=path,
+        max_attempts=2,
+    )
+    runner.run(
+        prompt="bad json",
+        context={"bucket_key": "I1|general|clarity_high"},
+        constraints={"must_be_json": True},
+    )
+
+    payload = json.loads(path.read_text(encoding="utf-8").strip().splitlines()[-1])
+    assert payload["run.mode"] == "main"

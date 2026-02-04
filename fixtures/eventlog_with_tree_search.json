@@ -4,7 +4,9 @@
   "bucket_key": "I3|math|clarity_low",
   "x_ref": "prove lemma",
   "run.mode": "tree",
-  "selected_rules": ["tree_search_rule"],
+  "selected_rules": [
+    {"rule_id": "default_math", "version": "0.1", "type": "policy"}
+  ],
   "pass_value": 0,
   "verifier_id": "basic_l1",
   "verifier_verdict": "PARTIAL",

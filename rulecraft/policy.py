@@ -20,29 +20,23 @@ class BudgetRouter:
         self.profile = profile or BudgetProfile()
 
     @staticmethod
-    def _extract_impact_level(impact_level: str | None, bucket_key: str | None) -> str | None:
-        if impact_level:
-            return impact_level
-        if bucket_key:
-            return bucket_key.split("|")[0]
+    def decide_next_mode(
+        verifier: VerifierResult,
+        current_mode: str,
+        attempt: int,
+    ) -> str | None:
+        if "schema_violation" in verifier.reason_codes:
+            return None
+        if verifier.outcome == "FAIL" or "insufficient_evidence" in verifier.reason_codes:
+            return _next_mode(current_mode)
         return None
 
-    def should_scale(
-        self,
-        verifier: VerifierResult,
-        *,
-        impact_level: str | None = None,
-        bucket_key: str | None = None,
-    ) -> bool:
-        impact_level = self._extract_impact_level(impact_level, bucket_key)
 
-        if verifier.outcome == "FAIL":
-            return True
-        if verifier.outcome == "UNKNOWN":
-            if impact_level == "I3":
-                return True
-            if "insufficient_evidence" in verifier.reason_codes:
-                return True
-        if "schema_violation" in verifier.reason_codes:
-            return False
-        return verifier.verdict != "PASS"
+def _next_mode(current_mode: str) -> str | None:
+    order = ["main", "probe", "tree", "full"]
+    if current_mode not in order:
+        return "main"
+    idx = order.index(current_mode)
+    if idx + 1 < len(order):
+        return order[idx + 1]
+    return None

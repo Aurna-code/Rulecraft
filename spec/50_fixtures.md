@@ -11,7 +11,9 @@ fixtures/는 contracts 기준으로 고정된 **플랫 EventLog** 예시를 제�
   "bucket_key": "I1|general|clarity_high",
   "x_ref": "hello",
   "run.mode": "main",
-  "selected_rules": [],
+  "selected_rules": [
+    {"rule_id": "default_general", "version": "0.1", "type": "policy"}
+  ],
   "pass_value": 1,
   "verifier_id": "basic_l1",
   "verifier_verdict": "PASS",

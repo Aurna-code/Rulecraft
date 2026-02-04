@@ -42,6 +42,13 @@ def pass_definition(verifier: VerifierResult) -> bool:
 
 
 @dataclass
+class SelectedRule:
+    rule_id: str
+    version: str
+    type: str
+
+
+@dataclass
 class EventLog:
     schema_version: SchemaVersion
     trace_id: str
@@ -50,7 +57,7 @@ class EventLog:
     state_key: str | None
     x_ref: str
     run_mode: str
-    selected_rules: list[str] = field(default_factory=list)
+    selected_rules: list[SelectedRule] = field(default_factory=list)
     pass_value: int = 0
     verifier_id: str = ""
     verifier_verdict: Verdict = "PASS"

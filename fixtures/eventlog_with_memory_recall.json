@@ -6,7 +6,10 @@
   "state_key": "state_default",
   "x_ref": "write a function",
   "run.mode": "main",
-  "selected_rules": ["noop_rule"],
+  "selected_rules": [
+    {"rule_id": "default_coding", "version": "0.1", "type": "policy"},
+    {"rule_id": "memory_hint", "version": "0.1", "type": "memory"}
+  ],
   "memory_recall_used_ids": ["mem_rule_1"],
   "pass_value": 1,
   "verifier_id": "basic_l1",

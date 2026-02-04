@@ -59,6 +59,11 @@ class BasicVerifier:
                     reason_codes.append("constraint_violation")
                     break
 
+        if constraints.get("requires_external_check") and verdict == "PASS":
+            verdict = "PARTIAL"
+            outcome = "UNKNOWN"
+            reason_codes.append("insufficient_evidence")
+
         if outcome == "UNKNOWN" and not reason_codes:
             reason_codes.append("insufficient_evidence")
 

@@ -8,7 +8,7 @@ MVP 단계에서는 nested verifier 객체나 selected_rules 객체 배열을 **
 ### 핵심 원칙
 - EventLog는 **플랫 필드**로 저장한다.
 - `verifier_*` 필드는 VerifierResult의 핵심 값을 **평탄화(flat)** 한 것이다.
-- `selected_rules`는 **rule_id 문자열 배열**로 최소 형태만 사용한다.
+- `selected_rules`는 **{rule_id, version, type} 객체 배열**로 최소 형태만 사용한다.
 - nested verifier 객체 / selected_rules 객체 배열은 **향후 확장 가능**하나, MVP에서는 **flat**을 고정한다.
 
 ### 필드 정의 (MUST)
@@ -17,7 +17,7 @@ MVP 단계에서는 nested verifier 객체나 selected_rules 객체 배열을 **
 - `bucket_key`: 문자열 (비어 있으면 안 됨)
 - `x_ref`: 문자열 (원문 prompt)
 - `run.mode`: 문자열 enum {"main","tree","probe","full"}
-- `selected_rules`: string[] (rule_id 목록, 비어 있어도 됨)
+- `selected_rules`: {rule_id, version, type} 객체 배열 (비어 있어도 됨)
 - `pass_value`: 0 또는 1
 - `verifier_id`: 문자열 (비어 있으면 안 됨)
 - `verifier_verdict`: 문자열 enum {"PASS","FAIL","PARTIAL"}

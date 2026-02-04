@@ -22,10 +22,19 @@
     "intent_key": {"type": ["string", "null"], "minLength": 1},
     "state_key": {"type": ["string", "null"], "minLength": 1},
     "x_ref": {"type": "string", "minLength": 1},
-    "run.mode": {"type": "string", "enum": ["main", "tree", "probe", "full"]},
+    "run.mode": {"type": "string", "enum": ["main", "probe", "tree", "full"]},
     "selected_rules": {
       "type": "array",
-      "items": {"type": "string", "minLength": 1}
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rule_id", "version", "type"],
+        "properties": {
+          "rule_id": {"type": "string", "minLength": 1},
+          "version": {"type": "string", "minLength": 1},
+          "type": {"type": "string", "minLength": 1}
+        }
+      }
     },
     "pass_value": {"type": "integer", "enum": [0, 1]},
     "verifier_id": {"type": "string", "minLength": 1},

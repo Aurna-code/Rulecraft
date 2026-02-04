@@ -14,10 +14,22 @@ class ValidationError(Exception):
 
 
 def validate(instance: object, schema: dict, resolver: object | None = None) -> None:
-    _validate(instance, schema, path="$")
+    _validate(instance, schema, path="$", root=schema)
 
 
-def _validate(instance: object, schema: dict, path: str) -> None:
+def _validate(instance: object, schema: dict, path: str, root: dict) -> None:
+    if "$ref" in schema:
+        ref = schema["$ref"]
+        if not isinstance(ref, str) or not ref.startswith("#/"):
+            raise ValidationError(f"{path}: unsupported ref {ref}")
+        target = root
+        for part in ref[2:].split("/"):
+            target = target.get(part)
+            if target is None:
+                raise ValidationError(f"{path}: unresolved ref {ref}")
+        _validate(instance, target, path, root)
+        return
+
     schema_type = schema.get("type")
     if schema_type is not None:
         _check_type(instance, schema_type, path)
@@ -52,13 +64,13 @@ def _validate(instance: object, schema: dict, path: str) -> None:
         properties = schema.get("properties", {})
         for key, value in instance.items():
             if key in properties:
-                _validate(value, properties[key], f"{path}.{key}")
+                _validate(value, properties[key], f"{path}.{key}", root)
 
     if isinstance(instance, list):
         items_schema = schema.get("items")
         if items_schema:
             for index, item in enumerate(instance):
-                _validate(item, items_schema, f"{path}[{index}]")
+                _validate(item, items_schema, f"{path}[{index}]", root)
 
 
 def _check_type(instance: object, schema_type: str | list[str], path: str) -> None:
