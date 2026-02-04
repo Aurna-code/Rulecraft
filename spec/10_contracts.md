@@ -1,85 +1,44 @@
-# 10) Contracts (Schemas)
+# Contracts (SSOT v0.5.15, Flat EventLog)
 
-## 공통 규칙
-- 모든 레코드는 schema_version MUST 포함 (값은 "0.5.15")
-- *_id는 전역 유일 MUST
-- EventLog는 trace_id를 중심으로 TraceCapsule/기타 저장소와 조인 가능해야 함
+이 문서는 contracts/fixtures에서 확정한 **플랫 EventLog 우주**를 SSOT로 고정한다.
+MVP 단계에서는 nested verifier 객체나 selected_rules 객체 배열을 **사용하지 않는다**.
 
----
+## EventLog (Flat, MVP)
 
-## 1) RuleRecord (Rulebook 저장 단위)
-필수 필드:
-- rule_id: string
-- version: string
-- type: "StrategyRule" | "GuardrailRule"
-- status: "temporary" | "active" | "retired"
-- body: string
-- applicability: {domain_tag?, task_family?, predicates?, bucket_keys?}
-- priority: {guardrail_first: bool, rank?}
-- evidence: {trace_ids?, verifier_ids?, regression_ids?}
-- tests: {regression_tests: [string], counterexample_tests: [string]}
-- metrics: {utility_q_ema?, pass_p_hat?, pass_p_lb95?, pass_p_K?, pass_p_bucket?, pass_p_bucket_delta?}
-- lifecycle?: {created_at?, updated_at?, last_used_at?, retire_candidate?}
+### 핵심 원칙
+- EventLog는 **플랫 필드**로 저장한다.
+- `verifier_*` 필드는 VerifierResult의 핵심 값을 **평탄화(flat)** 한 것이다.
+- `selected_rules`는 **rule_id 문자열 배열**로 최소 형태만 사용한다.
+- nested verifier 객체 / selected_rules 객체 배열은 **향후 확장 가능**하나, MVP에서는 **flat**을 고정한다.
 
-규율:
-- GuardrailRule은 guardrail_first=true 권장
-- active 승격은 tests 게이트 통과 전엔 금지(temporary 유지)
+### 필드 정의 (MUST)
+- `schema_version`: 문자열, 반드시 "0.5.15"
+- `trace_id`: 문자열 (비어 있으면 안 됨)
+- `bucket_key`: 문자열 (비어 있으면 안 됨)
+- `x_ref`: 문자열 (원문 prompt)
+- `run.mode`: 문자열 enum {"main","tree","probe","full"}
+- `selected_rules`: string[] (rule_id 목록, 비어 있어도 됨)
+- `pass_value`: 0 또는 1
+- `verifier_id`: 문자열 (비어 있으면 안 됨)
+- `verifier_verdict`: 문자열 enum {"PASS","FAIL","PARTIAL"}
+- `verifier_outcome`: 문자열 enum {"OK","FAIL","UNKNOWN"}
 
----
+### 필드 정의 (SHOULD/MAY)
+- `verifier_reason_codes`: string[] (SHOULD)
+- `verifier_violated_constraints`: string[] (SHOULD)
+- `intent_key`: string | null (SHOULD)
+- `state_key`: string | null (SHOULD)
+- `memory_recall_used_ids`: string[] (MAY)
+- `cost_profile`: object | null (MAY)
 
-## 2) CandidateSelectRequest / Response
-CandidateSelectRequest:
-- request_id, x_ref MUST
-- constraints: {max_rules:int, allow_types:[...]} MUST
-- bucket_key/context는 SHOULD
+## VerifierResult
 
-CandidateSelectResponse:
-- selected_rules[] MUST
-  - rule_id, version, type, injection_mode MUST
-  - injection_mode: "prepend"|"inline"|"system_guard"
-  - score/reasons는 optional
+- VerifierResult는 contracts/verifier_result.schema.json에 정의한다.
+- EventLog는 VerifierResult의 핵심 값을 `verifier_*`로 **평탄화**하여 기록한다.
 
-규율:
-- max_rules 초과 금지
-- allow_types 밖의 type 선택 금지
-- GuardrailRule은 system_guard 또는 prepend 우선(정책으로 고정 가능)
+## Dotted Key 정책
 
----
-
-## 3) VerifierResult (반드시 이 형태로 반환)
-필수:
-- verifier_id: string
-- verdict: "PASS"|"FAIL"|"PARTIAL"
-- outcome: "OK"|"FAIL"|"UNKNOWN"
-
-권장/옵션:
-- score: 0..1 (스케일링/선별 신호)
-- reason_codes: [string] (FAIL/PARTIAL이면 최소 1개 권장)
-- violated_constraints: [string] (자유서술 금지, 안정 키)
-- failure_cluster_id?: string
-- fgfc?: object (optional extension)
-
----
-
-## 4) PASS (derived semantic)
-PASS := (verdict=="PASS") AND (outcome!="FAIL")
-
-주의:
-- verdict PASS여도 outcome FAIL이면 pass=0
-
----
-
-## 5) EventLog (JSONL로 append 저장)
-필수:
-- trace_id: string
-- x_ref: string
-- selected_rules[] (CandidateSelectResponse의 일부 미러)
-- run.mode: "main"|"sot"|"matts"|"kroll"|"synth"|"tree"
-- verifier: VerifierResult (최소한 미러 필드 저장)
-
-권장:
-- bucket_key: "I{1|2|3}|{domain}|clarity_{low|med|high}" 형태
-- memory_recall / memory_fold / memory_actions / praxis 등 확장 필드는 optional로 유지
-
-규율:
-- EventLog는 집계 가능한 필드만 넣고, 상세는 TraceCapsule에 넣는 구조를 유지
+- JSONL 저장 시에는 dotted key(`run.mode`)를 **허용/사용**한다.
+- 파이썬 내부 표현은 `run_mode` 같은 정상 필드명을 사용한다.
+- 직렬화/역직렬화 레이어에서만 dotted key로 변환한다.
+- contracts가 dotted key를 강제하는 경우, **mapper 함수**로 내부 ↔ 저장 표현을 변환한다.

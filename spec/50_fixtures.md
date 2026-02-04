@@ -1,23 +1,38 @@
-# 50) Fixtures (Sample JSON)
+# Fixtures (SSOT v0.5.15, Flat EventLog)
+
+fixtures/는 contracts 기준으로 고정된 **플랫 EventLog** 예시를 제공한다.
+
+## EventLog 예시 (Flat)
+
+```json
+{
+  "schema_version": "0.5.15",
+  "trace_id": "trace_minimal_pass",
+  "bucket_key": "I1|general|clarity_high",
+  "x_ref": "hello",
+  "run.mode": "main",
+  "selected_rules": [],
+  "pass_value": 1,
+  "verifier_id": "basic_l1",
+  "verifier_verdict": "PASS",
+  "verifier_outcome": "OK",
+  "verifier_reason_codes": []
+}
+```
 
 ## VerifierResult 예시
-{
-  "schema_version": "0.5.15",
-  "verifier_id": "v_l1_only",
-  "verdict": "PASS",
-  "outcome": "UNKNOWN",
-  "score": 0.55,
-  "reason_codes": ["insufficient_evidence"],
-  "violated_constraints": null
-}
 
-## EventLog 최소 예시(JSONL 한 줄)
+```json
 {
   "schema_version": "0.5.15",
-  "trace_id": "t_20260131_000001",
-  "x_ref": "user:msg#123",
-  "bucket_key": "I2|coding|clarity_med",
-  "selected_rules": [{"rule_id":"r1","version":"0.1.0","type":"GuardrailRule"}],
-  "run": {"mode": "main", "cfg": {"temperature": 0.2}},
-  "verifier": {"verifier_id":"v_l1_only","verdict":"PASS","outcome":"UNKNOWN","reason_codes":["insufficient_evidence"]}
+  "verifier_id": "basic_l1",
+  "verdict": "FAIL",
+  "outcome": "FAIL",
+  "reason_codes": ["schema_violation"],
+  "violated_constraints": ["FORMAT:JSON_ONLY"]
 }
+```
+
+## Dotted Key 정책
+- 저장 형식(JSONL)은 `run.mode` 같은 dotted key를 사용한다.
+- 내부 파이썬 표현은 `run_mode`를 사용하며, 직렬화/역직렬화에서만 변환한다.

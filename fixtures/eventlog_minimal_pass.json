@@ -2,14 +2,12 @@
   "schema_version": "0.5.15",
   "trace_id": "trace_minimal_pass",
   "bucket_key": "I1|general|clarity_high",
-  "verifier": {
-    "verifier_id": "basic_l1",
-    "verdict": "PASS",
-    "outcome": "OK",
-    "reason_codes": []
-  },
   "x_ref": "hello",
   "run.mode": "main",
   "selected_rules": [],
-  "pass_value": 1
+  "pass_value": 1,
+  "verifier_id": "basic_l1",
+  "verifier_verdict": "PASS",
+  "verifier_outcome": "OK",
+  "verifier_reason_codes": []
 }

@@ -56,11 +56,13 @@ def validate_eventlog(payload: dict) -> None:
         "schema_version",
         "trace_id",
         "bucket_key",
-        "verifier",
         "x_ref",
         "run.mode",
         "selected_rules",
         "pass_value",
+        "verifier_id",
+        "verifier_verdict",
+        "verifier_outcome",
     ]
     for key in required:
         assert key in payload
@@ -76,24 +78,18 @@ def validate_eventlog(payload: dict) -> None:
         assert payload["intent_key"].strip()
     if "state_key" in payload and payload["state_key"] is not None:
         assert payload["state_key"].strip()
-    if "verdict" in payload:
-        assert payload["verdict"] in {"PASS", "FAIL", "PARTIAL"}
-    if "outcome" in payload:
-        assert payload["outcome"] in {"OK", "FAIL", "UNKNOWN"}
 
     assert_type(payload["selected_rules"], list)
     for rule in payload["selected_rules"]:
         assert rule.strip()
 
-    verifier = payload["verifier"]
-    assert_type(verifier, dict)
-    assert verifier["verifier_id"].strip()
-    assert verifier["verdict"] in {"PASS", "FAIL", "PARTIAL"}
-    assert verifier["outcome"] in {"OK", "FAIL", "UNKNOWN"}
-    if "reason_codes" in verifier:
-        assert_type(verifier["reason_codes"], list)
-    if "violated_constraints" in verifier:
-        assert_type(verifier["violated_constraints"], list)
+    assert payload["verifier_id"].strip()
+    assert payload["verifier_verdict"] in {"PASS", "FAIL", "PARTIAL"}
+    assert payload["verifier_outcome"] in {"OK", "FAIL", "UNKNOWN"}
+    if "verifier_reason_codes" in payload:
+        assert_type(payload["verifier_reason_codes"], list)
+    if "verifier_violated_constraints" in payload:
+        assert_type(payload["verifier_violated_constraints"], list)
 
     if "memory_recall_used_ids" in payload:
         assert_type(payload["memory_recall_used_ids"], list)
@@ -150,8 +146,6 @@ def test_invariant_non_empty_ids() -> None:
             assert payload["trace_id"].strip()
         if "verifier_id" in payload:
             assert payload["verifier_id"].strip()
-        if "verifier" in payload:
-            assert payload["verifier"]["verifier_id"].strip()
 
         if fixture_path.name.startswith("eventlog_"):
             validate_eventlog(payload)

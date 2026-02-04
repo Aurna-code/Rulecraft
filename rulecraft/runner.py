@@ -11,6 +11,7 @@ from rulecraft.adapters import LLMAdapter, VerifierAdapter
 from rulecraft.memory import MemoryStore
 from rulecraft.policy import BudgetRouter
 from rulecraft.schemas import EventLog, VerifierResult, pass_definition
+from rulecraft.serializer import serialize_eventlog
 
 
 @dataclass
@@ -125,40 +126,19 @@ class RulecraftRunner:
             bucket_key=bucket_key,
             intent_key=intent_key,
             state_key=state_key,
-            verdict=verifier.verdict,
-            outcome=verifier.outcome,
-            pass_value=1 if pass_definition(verifier) else 0,
             x_ref=prompt,
             run_mode=context.get("run_mode", "main"),
             selected_rules=context.get("selected_rules", []),
+            pass_value=1 if pass_definition(verifier) else 0,
+            verifier_id=verifier.verifier_id,
+            verifier_verdict=verifier.verdict,
+            verifier_outcome=verifier.outcome,
+            verifier_reason_codes=verifier.reason_codes,
+            verifier_violated_constraints=verifier.violated_constraints,
             memory_recall_used_ids=[item.memory_id for item in memory_response.items],
-            reason_codes=verifier.reason_codes,
-            violated_constraints=verifier.violated_constraints,
             cost_profile=context.get("cost_profile"),
         )
 
-        eventlog_payload = {
-            "schema_version": event_log.schema_version,
-            "trace_id": event_log.trace_id,
-            "bucket_key": event_log.bucket_key,
-            "intent_key": event_log.intent_key,
-            "state_key": event_log.state_key,
-            "verdict": event_log.verdict,
-            "outcome": event_log.outcome,
-            "pass_value": event_log.pass_value,
-            "x_ref": event_log.x_ref,
-            "run.mode": event_log.run_mode,
-            "selected_rules": event_log.selected_rules,
-            "memory_recall_used_ids": event_log.memory_recall_used_ids,
-            "cost_profile": event_log.cost_profile,
-            "verifier": {
-                "verifier_id": verifier.verifier_id,
-                "verdict": event_log.verdict,
-                "outcome": event_log.outcome,
-                "reason_codes": event_log.reason_codes,
-                "violated_constraints": event_log.violated_constraints,
-            },
-        }
-        self._append_eventlog(eventlog_payload)
+        self._append_eventlog(serialize_eventlog(event_log))
 
         return RunResult(output=output, verifier=verifier, event_log=event_log)

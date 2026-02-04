@@ -8,7 +8,7 @@ from rulecraft.runner import RulecraftRunner
 from rulecraft.schemas import VerifierResult, pass_definition
 from rulecraft.verifier import BasicVerifier
 
-STABLE_KEY_PATTERN = re.compile(r"^[A-Z]+:[A-Z0-9_]+(?:[:A-Z0-9_]+)?$")
+STABLE_KEY_PATTERN = re.compile(r"^[A-Z0-9_]+:[A-Z0-9_]+(:[A-Z0-9_]+)?$")
 
 
 def test_t01_pass_definition_fixed() -> None:
@@ -65,15 +65,18 @@ def test_t04_eventlog_jsonl_append() -> None:
     lines = path.read_text(encoding="utf-8").strip().splitlines()
     assert len(lines) == 1
     payload = json.loads(lines[0])
+    if payload.get("verifier_outcome") == "UNKNOWN":
+        assert payload.get("verifier_reason_codes")
     assert {
         "schema_version",
         "trace_id",
         "x_ref",
         "selected_rules",
         "run.mode",
-        "verifier",
+        "verifier_id",
+        "verifier_verdict",
+        "verifier_outcome",
     }.issubset(payload.keys())
-    assert {"verdict", "outcome", "reason_codes"}.issubset(payload["verifier"].keys())
 
 
 def test_t07_should_scale_defaults() -> None:

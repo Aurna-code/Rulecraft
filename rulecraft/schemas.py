@@ -48,13 +48,14 @@ class EventLog:
     bucket_key: str
     intent_key: str | None
     state_key: str | None
-    verdict: Verdict
-    outcome: Outcome
-    pass_value: int
     x_ref: str
     run_mode: str
     selected_rules: list[str] = field(default_factory=list)
+    pass_value: int = 0
+    verifier_id: str = ""
+    verifier_verdict: Verdict = "PASS"
+    verifier_outcome: Outcome = "UNKNOWN"
+    verifier_reason_codes: list[str] = field(default_factory=list)
+    verifier_violated_constraints: list[str] = field(default_factory=list)
     memory_recall_used_ids: list[str] = field(default_factory=list)
-    reason_codes: list[str] = field(default_factory=list)
-    violated_constraints: list[str] = field(default_factory=list)
     cost_profile: dict | None = None
