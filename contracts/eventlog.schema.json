@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EventLog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "trace_id",
+    "bucket_key",
+    "verifier",
+    "x_ref",
+    "run.mode",
+    "selected_rules",
+    "pass_value"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["0.5.15"]},
+    "trace_id": {"type": "string", "minLength": 1},
+    "bucket_key": {"type": "string", "minLength": 1},
+    "intent_key": {"type": ["string", "null"], "minLength": 1},
+    "state_key": {"type": ["string", "null"], "minLength": 1},
+    "verdict": {"type": "string", "enum": ["PASS", "FAIL", "PARTIAL"]},
+    "outcome": {"type": "string", "enum": ["OK", "FAIL", "UNKNOWN"]},
+    "pass_value": {"type": "integer", "enum": [0, 1]},
+    "x_ref": {"type": "string", "minLength": 1},
+    "run.mode": {"type": "string", "enum": ["main", "tree", "probe", "full"]},
+    "selected_rules": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "verifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verifier_id", "verdict", "outcome"],
+      "properties": {
+        "verifier_id": {"type": "string", "minLength": 1},
+        "verdict": {"type": "string", "enum": ["PASS", "FAIL", "PARTIAL"]},
+        "outcome": {"type": "string", "enum": ["OK", "FAIL", "UNKNOWN"]},
+        "reason_codes": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "violated_constraints": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "memory_recall_used_ids": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "cost_profile": {"type": ["object", "null"]}
+  }
+}
