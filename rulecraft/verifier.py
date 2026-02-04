@@ -37,22 +37,30 @@ class BasicVerifier:
                 json.loads(content)
             except json.JSONDecodeError:
                 verdict = "FAIL"
+                outcome = "FAIL"
                 violated.append("FORMAT:JSON_ONLY")
                 reason_codes.append("schema_violation")
 
-        required_substrings = constraints.get("required_substrings", [])
-        for required in required_substrings:
-            if required not in content:
-                verdict = "FAIL"
-                violated.append(f"CONSTRAINT:REQUIRED:{required}")
-                reason_codes.append("constraint_violation")
+        if constraints.get("required_substrings"):
+            for required in constraints["required_substrings"]:
+                if required not in content:
+                    verdict = "FAIL"
+                    outcome = "FAIL"
+                    violated.append("CONSTRAINT:REQUIRED")
+                    reason_codes.append("constraint_violation")
+                    break
 
-        forbidden_substrings = constraints.get("forbidden_substrings", [])
-        for forbidden in forbidden_substrings:
-            if forbidden in content:
-                verdict = "FAIL"
-                violated.append(f"CONSTRAINT:FORBIDDEN:{forbidden}")
-                reason_codes.append("constraint_violation")
+        if constraints.get("forbidden_substrings"):
+            for forbidden in constraints["forbidden_substrings"]:
+                if forbidden in content:
+                    verdict = "FAIL"
+                    outcome = "FAIL"
+                    violated.append("CONSTRAINT:FORBIDDEN")
+                    reason_codes.append("constraint_violation")
+                    break
+
+        if outcome == "UNKNOWN" and not reason_codes:
+            reason_codes.append("insufficient_evidence")
 
         return VerifierResult(
             schema_version=self.schema_version,

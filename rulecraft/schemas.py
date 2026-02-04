@@ -51,6 +51,9 @@ class EventLog:
     verdict: Verdict
     outcome: Outcome
     pass_value: int
+    x_ref: str
+    run_mode: str
+    selected_rules: list[str] = field(default_factory=list)
     memory_recall_used_ids: list[str] = field(default_factory=list)
     reason_codes: list[str] = field(default_factory=list)
     violated_constraints: list[str] = field(default_factory=list)

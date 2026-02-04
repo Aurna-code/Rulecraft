@@ -2,6 +2,8 @@
 
 Rulecraft Development
 
+Spec guidance: the `spec/` directory is the single source of truth.
+
 ## Overview
 Rulecraft is an orchestration layer that wraps LLM calls with policy, memory recall, verification, and logging.
 This repository contains a minimal MVP implementation that follows the Playbook, SSOT, Verifier Spec, and Addendum
