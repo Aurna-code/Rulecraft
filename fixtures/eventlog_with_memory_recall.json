@@ -1,0 +1,18 @@
+{
+  "schema_version": "0.5.15",
+  "trace_id": "trace_memory_recall",
+  "bucket_key": "I2|coding|clarity_high",
+  "intent_key": "intent_coding",
+  "state_key": "state_default",
+  "verifier": {
+    "verifier_id": "basic_l1",
+    "verdict": "PASS",
+    "outcome": "UNKNOWN",
+    "reason_codes": ["insufficient_evidence"]
+  },
+  "x_ref": "write a function",
+  "run.mode": "main",
+  "selected_rules": ["noop_rule"],
+  "memory_recall_used_ids": ["mem_rule_1"],
+  "pass_value": 1
+}

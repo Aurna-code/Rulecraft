@@ -1,0 +1,15 @@
+{
+  "schema_version": "0.5.15",
+  "trace_id": "trace_praxis",
+  "bucket_key": "I2|general|clarity_med",
+  "verifier": {
+    "verifier_id": "basic_l1",
+    "verdict": "PASS",
+    "outcome": "OK",
+    "reason_codes": []
+  },
+  "x_ref": "summarize plan",
+  "run.mode": "main",
+  "selected_rules": ["praxis_tactic_1"],
+  "pass_value": 1
+}

@@ -1,0 +1,60 @@
+"""Core schemas and derived semantics for Rulecraft."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Literal
+
+SchemaVersion = Literal["0.5.15"]
+Verdict = Literal["PASS", "FAIL", "PARTIAL"]
+Outcome = Literal["OK", "FAIL", "UNKNOWN"]
+
+
+@dataclass
+class FGFCItem:
+    claim: str
+    evidence: list[str]
+    error_type: str | None = None
+    correction: str | None = None
+
+
+@dataclass
+class FGFCReport:
+    items: list[FGFCItem] = field(default_factory=list)
+
+
+@dataclass
+class VerifierResult:
+    schema_version: SchemaVersion
+    verifier_id: str
+    verdict: Verdict
+    outcome: Outcome
+    score: float | None = None
+    reason_codes: list[str] = field(default_factory=list)
+    violated_constraints: list[str] = field(default_factory=list)
+    fgfc: FGFCReport | None = None
+    failure_cluster_id: str | None = None
+
+
+def pass_definition(verifier: VerifierResult) -> bool:
+    """PASS iff verdict == PASS and outcome != FAIL."""
+    return verifier.verdict == "PASS" and verifier.outcome != "FAIL"
+
+
+@dataclass
+class EventLog:
+    schema_version: SchemaVersion
+    trace_id: str
+    bucket_key: str
+    intent_key: str | None
+    state_key: str | None
+    verdict: Verdict
+    outcome: Outcome
+    pass_value: int
+    x_ref: str
+    run_mode: str
+    selected_rules: list[str] = field(default_factory=list)
+    memory_recall_used_ids: list[str] = field(default_factory=list)
+    reason_codes: list[str] = field(default_factory=list)
+    violated_constraints: list[str] = field(default_factory=list)
+    cost_profile: dict | None = None
