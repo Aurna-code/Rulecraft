@@ -25,18 +25,13 @@ class BudgetRouter:
         current_mode: str,
         attempt: int,
     ) -> str | None:
+        """Escalate deterministically to tree on FAIL or insufficient evidence."""
+        if current_mode == "tree":
+            return None
         if "schema_violation" in verifier.reason_codes:
             return None
-        if verifier.outcome == "FAIL" or "insufficient_evidence" in verifier.reason_codes:
-            return _next_mode(current_mode)
+        if verifier.verdict == "FAIL":
+            return "tree"
+        if verifier.verdict == "PARTIAL" and "insufficient_evidence" in verifier.reason_codes:
+            return "tree"
         return None
-
-
-def _next_mode(current_mode: str) -> str | None:
-    order = ["main", "probe", "tree", "full"]
-    if current_mode not in order:
-        return "main"
-    idx = order.index(current_mode)
-    if idx + 1 < len(order):
-        return order[idx + 1]
-    return None

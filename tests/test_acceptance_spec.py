@@ -87,16 +87,16 @@ def test_t07_should_scale_defaults() -> None:
         verdict="FAIL",
         outcome="FAIL",
     )
-    assert router.decide_next_mode(fail_verifier, "main", 0) == "probe"
+    assert router.decide_next_mode(fail_verifier, "main", 0) == "tree"
 
     unknown_i3 = VerifierResult(
         schema_version="0.5.15",
         verifier_id="test",
-        verdict="PASS",
+        verdict="PARTIAL",
         outcome="UNKNOWN",
         reason_codes=["insufficient_evidence"],
     )
-    assert router.decide_next_mode(unknown_i3, "main", 0) == "probe"
+    assert router.decide_next_mode(unknown_i3, "main", 0) == "tree"
 
 
 def test_t08_escalates_on_insufficient_evidence() -> None:
@@ -117,7 +117,7 @@ def test_t08_escalates_on_insufficient_evidence() -> None:
     )
 
     payload = json.loads(path.read_text(encoding="utf-8").strip().splitlines()[-1])
-    assert payload["run.mode"] in {"probe", "tree", "full"}
+    assert payload["run.mode"] == "tree"
 
 
 def test_t09_no_escalation_on_schema_violation() -> None:
@@ -138,4 +138,25 @@ def test_t09_no_escalation_on_schema_violation() -> None:
     )
 
     payload = json.loads(path.read_text(encoding="utf-8").strip().splitlines()[-1])
+    assert payload["run.mode"] == "main"
+
+
+def test_t10_selected_rules_and_run_mode_present() -> None:
+    path = Path("data") / "eventlog.jsonl"
+    if path.exists():
+        path.unlink()
+
+    runner = RulecraftRunner(
+        llm_adapter=EchoLLMAdapter(),
+        verifier=BasicVerifier(),
+        eventlog_path=path,
+    )
+    runner.run(prompt="hello", context={"bucket_key": "I1|general|clarity_high"})
+
+    payload = json.loads(path.read_text(encoding="utf-8").strip().splitlines()[-1])
+    assert payload["selected_rules"]
+    for rule in payload["selected_rules"]:
+        assert rule["rule_id"]
+        assert rule["version"]
+        assert rule["type"]
     assert payload["run.mode"] == "main"
