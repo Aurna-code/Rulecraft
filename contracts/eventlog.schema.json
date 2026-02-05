@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EventLog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "trace_id",
+    "bucket_key",
+    "x_ref",
+    "run",
+    "selected_rules",
+    "pass_value",
+    "verifier_id",
+    "verifier_verdict",
+    "verifier_outcome"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["0.5.15"]},
+    "trace_id": {"type": "string", "minLength": 1},
+    "bucket_key": {"type": "string", "minLength": 1},
+    "intent_key": {"type": ["string", "null"], "minLength": 1},
+    "state_key": {"type": ["string", "null"], "minLength": 1},
+    "x_ref": {"type": "string", "minLength": 1},
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {"type": "string", "enum": ["main", "probe", "tree", "full"]}
+      }
+    },
+    "selected_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rule_id", "version", "type"],
+        "properties": {
+          "rule_id": {"type": "string", "minLength": 1},
+          "version": {"type": "string", "minLength": 1},
+          "type": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "pass_value": {"type": "integer", "enum": [0, 1]},
+    "verifier_id": {"type": "string", "minLength": 1},
+    "verifier_verdict": {"type": "string", "enum": ["PASS", "FAIL", "PARTIAL"]},
+    "verifier_outcome": {"type": "string", "enum": ["OK", "FAIL", "UNKNOWN"]},
+    "verifier_reason_codes": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "verifier_violated_constraints": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "memory_recall_used_ids": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "tree_search": {"type": "object"},
+    "memory_recall": {"type": "object"},
+    "praxis": {"type": "object"},
+    "cost_profile": {"type": ["object", "null"]}
+  }
+}
