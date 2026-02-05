@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-OUTPUT="review_packet2.txt"
+OUTPUT="${OUTPUT:-/tmp/review_packet2.txt}"
 
 write_file() {
   local file="$1"
@@ -20,6 +20,12 @@ if [ -d "spec" ]; then
   done < <(find spec -type f | sort)
 fi
 
+for file in Rulecraft_*.md; do
+  if [ -f "${file}" ]; then
+    write_file "${file}"
+  fi
+done
+
 for file in contracts/*.json; do
   if [ -f "${file}" ]; then
     write_file "${file}"
@@ -32,7 +38,7 @@ if [ -d "fixtures" ]; then
   done < <(find fixtures -type f | sort)
 fi
 
-for file in rulecraft/serializer.py rulecraft/verifier.py rulecraft/policy.py; do
+for file in rulecraft/serializer.py rulecraft/verifier.py rulecraft/policy.py rulecraft/runner.py; do
   if [ -f "${file}" ]; then
     write_file "${file}"
   fi

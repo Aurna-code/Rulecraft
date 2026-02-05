@@ -3,7 +3,7 @@
   "trace_id": "trace_minimal_pass",
   "bucket_key": "I1|general|clarity_high",
   "x_ref": "hello",
-  "run.mode": "main",
+  "run": {"mode": "main"},
   "selected_rules": [
     {"rule_id": "default_general", "version": "0.1", "type": "policy"}
   ],

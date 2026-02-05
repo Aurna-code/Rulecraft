@@ -5,7 +5,7 @@
   "intent_key": "intent_coding",
   "state_key": "state_default",
   "x_ref": "write a function",
-  "run.mode": "main",
+  "run": {"mode": "main"},
   "selected_rules": [
     {"rule_id": "default_coding", "version": "0.1", "type": "policy"},
     {"rule_id": "memory_hint", "version": "0.1", "type": "memory"}

@@ -3,7 +3,7 @@
   "trace_id": "trace_tree_search",
   "bucket_key": "I3|math|clarity_low",
   "x_ref": "prove lemma",
-  "run.mode": "tree",
+  "run": {"mode": "tree"},
   "selected_rules": [
     {"rule_id": "default_math", "version": "0.1", "type": "policy"}
   ],

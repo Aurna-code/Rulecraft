@@ -3,7 +3,7 @@
   "trace_id": "trace_praxis",
   "bucket_key": "I2|general|clarity_med",
   "x_ref": "summarize plan",
-  "run.mode": "main",
+  "run": {"mode": "main"},
   "selected_rules": [
     {"rule_id": "praxis_tactic_1", "version": "0.1", "type": "tactic"}
   ],

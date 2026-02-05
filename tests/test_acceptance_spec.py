@@ -72,7 +72,7 @@ def test_t04_eventlog_jsonl_append() -> None:
         "trace_id",
         "x_ref",
         "selected_rules",
-        "run.mode",
+        "run",
         "verifier_id",
         "verifier_verdict",
         "verifier_outcome",
@@ -117,7 +117,7 @@ def test_t08_escalates_on_insufficient_evidence() -> None:
     )
 
     payload = json.loads(path.read_text(encoding="utf-8").strip().splitlines()[-1])
-    assert payload["run.mode"] == "tree"
+    assert payload["run"]["mode"] == "tree"
 
 
 def test_t09_no_escalation_on_schema_violation() -> None:
@@ -138,7 +138,7 @@ def test_t09_no_escalation_on_schema_violation() -> None:
     )
 
     payload = json.loads(path.read_text(encoding="utf-8").strip().splitlines()[-1])
-    assert payload["run.mode"] == "main"
+    assert payload["run"]["mode"] == "main"
 
 
 def test_t10_selected_rules_and_run_mode_present() -> None:
@@ -159,4 +159,4 @@ def test_t10_selected_rules_and_run_mode_present() -> None:
         assert rule["rule_id"]
         assert rule["version"]
         assert rule["type"]
-    assert payload["run.mode"] == "main"
+    assert payload["run"]["mode"] == "main"

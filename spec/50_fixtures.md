@@ -10,7 +10,7 @@ fixtures/는 contracts 기준으로 고정된 **플랫 EventLog** 예시를 제�
   "trace_id": "trace_minimal_pass",
   "bucket_key": "I1|general|clarity_high",
   "x_ref": "hello",
-  "run.mode": "main",
+  "run": {"mode": "main"},
   "selected_rules": [
     {"rule_id": "default_general", "version": "0.1", "type": "policy"}
   ],
@@ -35,6 +35,6 @@ fixtures/는 contracts 기준으로 고정된 **플랫 EventLog** 예시를 제�
 }
 ```
 
-## Dotted Key 정책
-- 저장 형식(JSONL)은 `run.mode` 같은 dotted key를 사용한다.
-- 내부 파이썬 표현은 `run_mode`를 사용하며, 직렬화/역직렬화에서만 변환한다.
+## Run Mode 정책
+- 저장 형식(JSONL)은 `run.mode` 같은 dotted key를 사용하지 않는다.
+- 내부 파이썬 표현은 `run_mode`를 사용하며, 직렬화 레이어에서만 `run: {mode}`로 변환한다.

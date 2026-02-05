@@ -8,7 +8,7 @@
     "trace_id",
     "bucket_key",
     "x_ref",
-    "run.mode",
+    "run",
     "selected_rules",
     "pass_value",
     "verifier_id",
@@ -22,7 +22,14 @@
     "intent_key": {"type": ["string", "null"], "minLength": 1},
     "state_key": {"type": ["string", "null"], "minLength": 1},
     "x_ref": {"type": "string", "minLength": 1},
-    "run.mode": {"type": "string", "enum": ["main", "probe", "tree", "full"]},
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {"type": "string", "enum": ["main", "probe", "tree", "full"]}
+      }
+    },
     "selected_rules": {
       "type": "array",
       "items": {
@@ -52,6 +59,9 @@
       "type": "array",
       "items": {"type": "string", "minLength": 1}
     },
+    "tree_search": {"type": "object"},
+    "memory_recall": {"type": "object"},
+    "praxis": {"type": "object"},
     "cost_profile": {"type": ["object", "null"]}
   }
 }

@@ -31,4 +31,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: review_packet2
-          path: review_packet2.txt
+          path: /tmp/review_packet2.txt
