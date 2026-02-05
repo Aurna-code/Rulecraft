@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VerifierResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "verifier_id", "verdict", "outcome"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["0.5.15"]
+    },
+    "verifier_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["PASS", "FAIL", "PARTIAL"]
+    },
+    "outcome": {
+      "type": "string",
+      "enum": ["OK", "FAIL", "UNKNOWN"]
+    },
+    "score": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "violated_constraints": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "fgfc": {"$ref": "fgfc_report.schema.json"},
+    "failure_cluster_id": {
+      "type": ["string", "null"],
+      "minLength": 1
+    }
+  }
+}
