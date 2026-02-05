@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
 
 jobs:
@@ -16,13 +16,43 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            requirements-dev.txt
+            requirements.txt
 
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          # requirements.txt가 없으면 일단 pytest만
-          pip install pytest
+          if [ -f requirements-dev.txt ]; then
+            pip install -r requirements-dev.txt
+          elif [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install pytest
+          fi
 
       - name: Run tests
         run: |
           pytest -q
+
+
+      - name: Build review packet
+        if: always()
+        run: |
+          echo "SHA: $GITHUB_SHA" > review_packet.txt
+          echo "REF: $GITHUB_REF" >> review_packet.txt
+          echo "==== python ====" >> review_packet.txt
+          python --version >> review_packet.txt
+          echo "==== repo tree (L4) ====" >> review_packet.txt
+          sudo apt-get update && sudo apt-get install -y tree
+          tree -L 4 >> review_packet.txt
+          echo "==== pytest ====" >> review_packet.txt
+          pytest -q >> review_packet.txt || true
+
+      - name: Upload review packet
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-packet
+          path: review_packet.txt
